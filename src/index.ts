@@ -21,7 +21,12 @@ async function main() {
 
     // Remote Sync: Public Profile Repository (giovanemedeiros/giovanemedeiros)
     console.log(`\n[INFO] Starting remote sync for Public Profile (${username}/${username})...`);
-    await ensureRepositoryExists(username, username, false);
+    await ensureRepositoryExists(
+      username,
+      username,
+      false,
+      "Catálogo dinâmico de projetos públicos e perfil profissional no GitHub."
+    );
     await syncFileContent({
       owner: username,
       repo: username,
@@ -33,7 +38,12 @@ async function main() {
     // Remote Sync: Private Inventory Repository (giovanemedeiros/github-profile-inventory)
     const inventoryRepoName = process.env.INVENTORY_REPO_NAME || "github-profile-inventory";
     console.log(`\n[INFO] Starting remote sync for Private Inventory (${username}/${inventoryRepoName})...`);
-    await ensureRepositoryExists(username, inventoryRepoName, true);
+    await ensureRepositoryExists(
+      username,
+      inventoryRepoName,
+      true,
+      "Inventário completo e automatizado de repositórios do GitHub."
+    );
     await syncFileContent({
       owner: username,
       repo: inventoryRepoName,
