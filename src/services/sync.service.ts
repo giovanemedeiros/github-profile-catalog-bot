@@ -15,10 +15,18 @@ interface SyncFileOptions {
 export async function ensureRepositoryExists(
   owner: string,
   repo: string,
-  isPrivate: boolean
+  isPrivate: boolean,
+  description?: string
 ): Promise<void> {
   try {
-    await octokit.rest.repos.get({ owner, repo });
+    const { data } = await octokit.rest.repos.get({ owner, repo });
+    if (description && !data.description) {
+      await octokit.rest.repos.update({
+        owner,
+        repo,
+        description,
+      });
+    }
   } catch (error: any) {
     if (error.status === 404) {
       console.log(`[INFO] Provisioning new repository: ${owner}/${repo} (Private: ${isPrivate})...`);
@@ -26,6 +34,7 @@ export async function ensureRepositoryExists(
         name: repo,
         private: isPrivate,
         auto_init: true,
+        ...(description ? { description } : {}),
       });
       console.log(`[SUCCESS] Repository ${owner}/${repo} created successfully.`);
     } else {

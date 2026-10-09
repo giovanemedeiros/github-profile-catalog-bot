@@ -1,0 +1,31 @@
+name: GitHub Profile & Inventory Catalog Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  sync-catalog:
+    name: Sync Profile and Inventory Catalog
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Execute Catalog Bot
+        run: npm run dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_USERNAME: ${{ vars.GITHUB_USERNAME || 'giovanemedeiros' }}
+          INVENTORY_REPO_NAME: ${{ vars.INVENTORY_REPO_NAME || 'github-profile-inventory' }}
