@@ -1,15 +1,24 @@
-import { octokit } from "./config/octokit.js";
+import { fetchAllRepositories } from "./services/github.service.js";
 
 async function main() {
   console.log("[INFO] [github-profile-catalog-bot] Initialized successfully.");
   
   try {
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-    console.log(`[SUCCESS] Authenticated successfully as: ${user.login} (${user.name || "No public name"})`);
-    console.log(`[INFO] Public Repos: ${user.public_repos} | Total Private Repos: ${user.total_private_repos ?? "N/A"}`);
+    const repos = await fetchAllRepositories();
+    console.log(`[SUCCESS] Fetched ${repos.length} repositories successfully.`);
+    console.table(
+      repos.map((r) => ({
+        Name: r.name,
+        Private: r.isPrivate,
+        Fork: r.isFork,
+        Archived: r.isArchived,
+        Topics: r.topics.join(", ") || "(none)",
+      }))
+    );
   } catch (error) {
-    console.error("[ERROR] Failed to authenticate with GitHub API:", error);
+    console.error("[ERROR] Failed to fetch repositories:", error);
   }
 }
 
 main();
+
