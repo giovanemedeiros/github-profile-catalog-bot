@@ -11,6 +11,6 @@ if (!token || token === "ghp_your_token_here" || token === "ghp_seu_token_real_a
   );
 }
 
-export const octokit = new Octokit({
+export const octokit: Octokit = new Octokit({
   auth: token,
 });
