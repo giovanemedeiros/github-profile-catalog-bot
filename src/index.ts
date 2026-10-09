@@ -2,6 +2,7 @@ import { fetchAllRepositories } from "./services/github.service.js";
 import { sortByCreationDateDesc } from "./utils/sorter.js";
 import { categorizeRepositories } from "./utils/categorizer.js";
 import { generateProfileReadme, generateInventoryMarkdown } from "./services/template.service.js";
+import { ensureRepositoryExists, syncFileContent } from "./services/sync.service.js";
 
 async function main() {
   console.log("[INFO] [github-profile-catalog-bot] Initialized successfully.");
@@ -12,28 +13,38 @@ async function main() {
     console.log(`[SUCCESS] Fetched ${rawRepos.length} repositories successfully.`);
 
     const sortedRepos = sortByCreationDateDesc(rawRepos);
-    console.log("[INFO] Repositories sorted in reverse chronological order (newest first).");
-
     const categorized = categorizeRepositories(sortedRepos);
 
-    // 1. Generate Public Profile README.md
+    // Generate Markdown documents
     const profileReadme = generateProfileReadme(categorized, username);
-    console.log("[INFO] Public Profile README.md generated successfully.");
-    // console.log(profileReadme)
-
-    // 2. Generate Private Complete Inventory Markdown
     const inventoryMarkdown = generateInventoryMarkdown(sortedRepos, username);
-    console.log("[INFO] Private Inventory Markdown generated successfully.");
-    // console.log(inventoryMarkdown)
 
-    // Save previews to disk for direct inspection in IDE / Obsidian
-    const fs = await import("fs");
-    fs.writeFileSync("preview_profile_README.md", profileReadme, "utf-8");
-    fs.writeFileSync("preview_inventory.md", inventoryMarkdown, "utf-8");
-    console.log("[SUCCESS] Preview files created: preview_profile_README.md and preview_inventory.md");
+    // Remote Sync: Public Profile Repository (giovanemedeiros/giovanemedeiros)
+    console.log(`\n[INFO] Starting remote sync for Public Profile (${username}/${username})...`);
+    await ensureRepositoryExists(username, username, false);
+    await syncFileContent({
+      owner: username,
+      repo: username,
+      path: "README.md",
+      content: profileReadme,
+      commitMessage: "docs: auto update profile catalog via bot",
+    });
 
+    // Remote Sync: Private Inventory Repository (giovanemedeiros/github-profile-inventory)
+    const inventoryRepoName = process.env.INVENTORY_REPO_NAME || "github-profile-inventory";
+    console.log(`\n[INFO] Starting remote sync for Private Inventory (${username}/${inventoryRepoName})...`);
+    await ensureRepositoryExists(username, inventoryRepoName, true);
+    await syncFileContent({
+      owner: username,
+      repo: inventoryRepoName,
+      path: "README.md",
+      content: inventoryMarkdown,
+      commitMessage: "docs: auto update repositories inventory via bot",
+    });
+
+    console.log("\n[SUCCESS] Full catalog bot pipeline completed successfully!");
   } catch (error) {
-    console.error("[ERROR] Failed to process repositories:", error);
+    console.error("[ERROR] Failed to execute catalog bot:", error);
   }
 }
 
