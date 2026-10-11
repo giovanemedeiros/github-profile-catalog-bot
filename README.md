@@ -9,10 +9,11 @@ O robô automatiza o gerenciamento de portfólio, governança de código e docum
 - Ordenação em ordem cronológica reversa por data de criação (do mais recente ao mais antigo).
 - Categorização estrita por tópicos prioritários (`qa`, `rpa`, `front-end`, `back-end`, `full-stack`, com fallback para `Outros Projetos`).
 - Sanitização de texto para garantir formatação limpa nas tabelas Markdown sem quebras indesejadas.
+- Validação pré-commit inteligente: compara o Markdown gerado com o arquivo remoto existente e pula a operação de escrita caso não haja alterações reais, evitando commits redundantes no histórico do Git.
 
 ## Provisionamento Automatico e Sincronizacao de Destinos
 
-O bot possui um mecanismo resiliente de auto-provisionamento (`ensureRepositoryExists` e `syncFileContent`). Caso os repositórios de destino não existam ou tenham sido excluídos, a automação detecta o status `404 Not Found`, cria os repositórios com suas configurações apropriadas e realiza o commit dos arquivos:
+O bot possui um mecanismo resiliente de auto-provisionamento e sincronização (`ensureRepositoryExists` e `syncFileContent`). Caso os repositórios de destino não existam ou tenham sido excluídos, a automação detecta o status `404 Not Found`, cria os repositórios com suas configurações apropriadas e realiza o commit dos arquivos:
 
 1. **Vitrine do Perfil Público (`<usuario>/<usuario>`):**
    - **Visibilidade:** Pública.
@@ -26,6 +27,11 @@ O bot possui um mecanismo resiliente de auto-provisionamento (`ensureRepositoryE
      - `[Public]` / `[Private]`
      - `[Fork]`
      - `[Archived]`
+
+3. **Validação Pré-Commit Inteligente (*Skip Unchanged*):**
+   - Antes de realizar a gravação remota via API, o robô decodifica o arquivo existente no GitHub e normaliza o texto.
+   - Caso o conteúdo estrutural seja idêntico ao Markdown atual, o robô encerra o ciclo exibindo `Skipping commit`.
+   - Essa validação mantém o histórico do Git limpo, previne commits redundantes a cada ciclo do agendamento diário e preserva o carimbo de data da última alteração real no inventário.
 
 ## Gestao Agil e Governanca com Jira Software
 

@@ -65,6 +65,22 @@ export async function syncFileContent(options: SyncFileOptions): Promise<void> {
     if ("sha" in response.data) {
       sha = response.data.sha;
     }
+
+    // Skip commit if content is identical (ignoring dynamic timestamp lines)
+    if ("content" in response.data && typeof response.data.content === "string") {
+      const existingDecoded = Buffer.from(response.data.content.replace(/\n/g, ""), "base64").toString("utf-8");
+      
+      const stripDynamic = (str: string) =>
+        str
+          .replace(/> \*\*Última Atualização:\*\* .+/g, "")
+          .replace(/\r\n/g, "\n")
+          .trim();
+
+      if (stripDynamic(existingDecoded) === stripDynamic(options.content)) {
+        console.log(`[INFO] Content unchanged for ${options.path} in ${options.owner}/${options.repo}. Skipping commit.`);
+        return;
+      }
+    }
   } catch (error: any) {
     if (error.status !== 404) {
       throw error;
