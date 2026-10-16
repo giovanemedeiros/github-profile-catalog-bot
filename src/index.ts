@@ -10,7 +10,7 @@ async function main() {
   try {
     const username = process.env.GITHUB_USERNAME || "giovanemedeiros";
     const rawRepos = await fetchAllRepositories();
-    console.log(`[SUCCESS] Fetched ${rawRepos.length} repositories successfully.`);
+    console.log("[SUCCESS] Repositories fetched successfully.");
 
     const sortedRepos = sortByCreationDateDesc(rawRepos);
     const categorized = categorizeRepositories(sortedRepos);

@@ -3,7 +3,8 @@ name: GitHub Profile & Inventory Catalog Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    # Runs daily at 03:00 UTC (00:00 BRT)
+    - cron: "0 3 * * *"
 
 jobs:
   sync-catalog:
