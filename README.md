@@ -28,10 +28,10 @@ O bot possui um mecanismo resiliente de auto-provisionamento e sincronização (
      - `[Fork]`
      - `[Archived]`
 
-3. **Validação Pré-Commit Inteligente (*Skip Unchanged*):**
-   - Antes de realizar a gravação remota via API, o robô decodifica o arquivo existente no GitHub e normaliza o texto.
-   - Caso o conteúdo estrutural seja idêntico ao Markdown atual, o robô encerra o ciclo exibindo `Skipping commit`.
-   - Essa validação mantém o histórico do Git limpo, previne commits redundantes a cada ciclo do agendamento diário e preserva o carimbo de data da última alteração real no inventário.
+3. **Validação Pré-Commit Inteligente (*Skip Unchanged*) e Histórico de Commit Único (*Single-Commit History*):**
+   - Antes de realizar a gravação remota via API, o robô decodifica o arquivo existente no GitHub, normaliza o texto e verifica se o histórico já está consolidado em um único commit.
+   - Caso o conteúdo estrutural seja idêntico ao Markdown atual e sem histórico residual, o robô encerra o ciclo exibindo `Skipping commit`.
+   - Quando há atualizações, o robô utiliza a Git Data API (`createTree` + `createCommit` com `parents: []` + `updateRef` com `force: true`), mantendo **sempre apenas 1 único commit** nos repositórios de destino e garantindo que repositórios que deixaram de ser públicos não deixem vestígios no histórico de commits.
 
 ## Gestao Agil e Governanca com Jira Software
 
