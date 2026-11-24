@@ -49,7 +49,7 @@ O projeto possui uma esteira automatizada configurada em `.github/workflows/cata
    - Acesse **Settings > Secrets and variables > Actions > New repository secret**.
    - Defina o nome como `PERSONAL_ACCESS_TOKEN` e insira o seu token pessoal com escopo `repo`.
 2. **Periodicidade e Gatilhos de Execucao:**
-   - **Agendamento Automatico (Diario):** Executa automaticamente uma vez a cada 24 horas (todos os dias as 03:00 UTC / 00:00 no horario de Brasilia - expressao cron `0 3 * * *`), mantendo os perfis e inventarios sempre sincronizados.
+   - **Agendamento Automatico (Diario):** Executa automaticamente uma vez a cada 24 horas (todos os dias as 06:17 UTC / 03:17 no horario de Brasilia - expressao cron `17 6 * * *`, utilizando minuto fora de pico para evitar filas no GitHub Actions), mantendo os perfis e inventarios sempre sincronizados.
    - **Disparo Manual Sob Demanda (Workflow Dispatch):** Pode ser executada a qualquer instante atraves da aba **Actions** > selecionando **GitHub Profile & Inventory Catalog Sync** > clicando em **Run workflow**.
 
 ## Arquitetura do Projeto
