@@ -49,8 +49,9 @@ O projeto possui uma esteira automatizada configurada em `.github/workflows/cata
    - Acesse **Settings > Secrets and variables > Actions > New repository secret**.
    - Defina o nome como `PERSONAL_ACCESS_TOKEN` e insira o seu token pessoal com escopo `repo`.
 2. **Periodicidade e Gatilhos de Execucao:**
-   - **Agendamento Automatico (Diario):** Executa automaticamente uma vez a cada 24 horas (todos os dias as 06:17 UTC / 03:17 no horario de Brasilia - expressao cron `17 6 * * *`, utilizando minuto fora de pico para evitar filas no GitHub Actions), mantendo os perfis e inventarios sempre sincronizados.
-   - **Disparo Manual Sob Demanda (Workflow Dispatch):** Pode ser executada a qualquer instante atraves da aba **Actions** > selecionando **GitHub Profile & Inventory Catalog Sync** > clicando em **Run workflow**.
+   - **Disparo Agendado de Alta Prioridade via API (`workflow_dispatch`):** Como o agendador interno (`on: schedule`) do GitHub Actions opera em uma fila compartilhada de baixa prioridade (sujeita a atrasos de varias horas em periodos de pico global), o bloco `schedule` permanece comentado por padrao no arquivo `.yml`. Para garantir a execucao estrita na janela da madrugada (**03:00 as 04:00 BRT**) com fila zero, utiliza-se um acionador externo (como o **Google Apps Script** ou ferramenta equivalente) que realiza uma requisicao `POST` na API oficial do GitHub acionando o `workflow_dispatch`. O repositorio inclui o template pronto em [`scripts/gas-trigger.template.js`](scripts/gas-trigger.template.js) e o guia completo de configuracao em [`scripts/README.md`](scripts/README.md).
+   - **Agendamento Nativo Opcional (`schedule / cron`):** Caso prefira utilizar o agendador interno do proprio GitHub Actions sem servicos externos, basta descomentar o bloco `schedule` (`cron: "17 6 * * *"`) em `.github/workflows/catalog-sync.yml`.
+   - **Disparo Manual Sob Demanda (Interface Web):** Pode ser executada a qualquer instante atraves da aba **Actions** > selecionando **GitHub Profile & Inventory Catalog Sync** > clicando em **Run workflow**.
 
 ## Arquitetura do Projeto
 
@@ -58,23 +59,26 @@ O projeto possui uma esteira automatizada configurada em `.github/workflows/cata
 github-profile-catalog-bot/
 ├── .github/
 │   └── workflows/
-│       └── catalog-sync.yml      # Pipeline CI/CD de sincronizacao continua
+│       └── catalog-sync.yml           # Pipeline CI/CD de sincronizacao continua
+├── scripts/
+│   ├── README.md                      # Guia passo a passo de agendamento no Google Apps Script
+│   └── gas-trigger.template.js        # Template JavaScript para disparo de alta prioridade via API
 ├── src/
 │   ├── config/
-│   │   └── octokit.ts             # Instancia autenticada do cliente Octokit
+│   │   └── octokit.ts                 # Instancia autenticada do cliente Octokit
 │   ├── services/
-│   │   ├── github.service.ts      # Servico de busca paginada de repositorios
-│   │   ├── template.service.ts    # Formatadores Markdown (Perfil e Inventario)
-│   │   └── sync.service.ts        # Motor de auto-provisionamento e commits via API
+│   │   ├── github.service.ts          # Servico de busca paginada de repositorios
+│   │   ├── template.service.ts        # Formatadores Markdown (Perfil e Inventario)
+│   │   └── sync.service.ts            # Motor de auto-provisionamento e commits via API
 │   ├── types/
-│   │   ├── category.type.ts       # Mapeamento e definicoes de categorias tecnicas
-│   │   └── repository.type.ts     # Interface de dados do repositorio
+│   │   ├── category.type.ts           # Mapeamento e definicoes de categorias tecnicas
+│   │   └── repository.type.ts         # Interface de dados do repositorio
 │   ├── utils/
-│   │   ├── categorizer.ts         # Logica estrita de identificacao de categorias
-│   │   └── sorter.ts              # Algoritmo de ordenacao cronologica decrescente
-│   └── index.ts                   # Orquestrador do fluxo da aplicacao
-├── .env.example                   # Exemplo de variaveis de ambiente locais
-├── LICENSE                        # Licenca GNU GPL v3.0
+│   │   ├── categorizer.ts             # Logica estrita de identificacao de categorias
+│   │   └── sorter.ts                  # Algoritmo de ordenacao cronologica decrescente
+│   └── index.ts                       # Orquestrador do fluxo da aplicacao
+├── .env.example                       # Exemplo de variaveis de ambiente locais
+├── LICENSE                            # Licenca GNU GPL v3.0
 ├── package.json
 └── tsconfig.json
 ```
