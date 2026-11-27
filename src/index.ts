@@ -59,6 +59,7 @@ async function main() {
     console.log("\n[SUCCESS] Full catalog bot pipeline completed successfully!");
   } catch (error) {
     console.error("[ERROR] Failed to execute catalog bot:", error);
+    process.exit(1);
   }
 }
 
